@@ -95,6 +95,15 @@ body {
     width: 100%;
 }
 
+/* Active nav link to indicate current section */
+.nav-link.active {
+    color: #ec4899;
+}
+
+.nav-link.active::after {
+    width: 100%;
+}
+
 .hamburger {
     display: none;
     flex-direction: column;

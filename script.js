@@ -39,6 +39,49 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Highlight active navigation link based on scroll position
+const sectionIds = ['home', 'about', 'education', 'projects', 'contact'];
+const sectionElements = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+
+function updateActiveNav() {
+    let currentSectionId = null;
+
+    for (const section of sectionElements) {
+        const rect = section.getBoundingClientRect();
+        const offsetTop = rect.top;
+        const sectionHeight = rect.height;
+
+        // Consider section active when top crosses 120px and until 50% of its height
+        if (offsetTop <= 120 && offsetTop + sectionHeight > 120) {
+            currentSectionId = section.id;
+            break;
+        }
+    }
+
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        const linkTarget = href && href.startsWith('#') ? href.substring(1) : null;
+        if (linkTarget && linkTarget === currentSectionId) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+window.addEventListener('scroll', updateActiveNav);
+window.addEventListener('load', updateActiveNav);
+document.addEventListener('DOMContentLoaded', updateActiveNav);
+
+// Also set active on click immediately for feedback
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
 // Form submission handling
 const contactForm = document.querySelector('.contact-form form');
 if (contactForm) {
