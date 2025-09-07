@@ -1,8 +1,11 @@
-// Mobile navigation functionality is now handled by initializeNavbar() function
+// Immediate navbar fix - runs as soon as script loads
+fixNavbar();
 
-// Navbar functionality is now handled by initializeNavbar() function
+// Also run when DOM is ready
+document.addEventListener('DOMContentLoaded', fixNavbar);
 
-// Active link functionality is now handled by initializeNavbar() function
+// Run again after a short delay to ensure it's working
+setTimeout(fixNavbar, 500);
 
 // Form submission handling
 const contactForm = document.querySelector('.contact-form form');
@@ -219,10 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize new features
     initScrollProgress();
-    initFloatingActionButton();
-    initBackToTop();
     initStarryBackground();
-    initializeNavbar();
+    fixNavbar();
 });
 
 // Enhanced parallax effect to floating elements
@@ -492,68 +493,6 @@ function initScrollProgress() {
     window.addEventListener('scroll', throttle(updateProgress, 10));
 }
 
-// Floating Action Button
-function initFloatingActionButton() {
-    const fab = document.querySelector('.floating-action-btn');
-    const fabMain = document.querySelector('.fab-main');
-    if (!fab || !fabMain) return;
-
-    fabMain.addEventListener('click', (e) => {
-        e.preventDefault();
-        fab.classList.toggle('active');
-    });
-
-    // Close FAB when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!fab.contains(e.target)) {
-            fab.classList.remove('active');
-        }
-    });
-
-    // Smooth scroll for FAB links
-    const fabItems = document.querySelectorAll('.fab-item');
-    fabItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = item.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                fab.classList.remove('active');
-            }
-        });
-    });
-}
-
-// Back to Top Button
-function initBackToTop() {
-    const backToTopBtn = document.querySelector('.back-to-top');
-    if (!backToTopBtn) return;
-
-    // Show/hide button based on scroll position
-    function toggleBackToTop() {
-        if (window.pageYOffset > 300) {
-            backToTopBtn.classList.add('visible');
-        } else {
-            backToTopBtn.classList.remove('visible');
-        }
-    }
-
-    window.addEventListener('scroll', throttle(toggleBackToTop, 100));
-
-    // Smooth scroll to top
-    backToTopBtn.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-}
-
 // Starry Background
 function initStarryBackground() {
     const starsContainer = document.querySelector('.stars-container');
@@ -580,80 +519,43 @@ function initStarryBackground() {
     }
 }
 
-// Enhanced navbar functionality - stays visible throughout page
-function initializeNavbar() {
+// Simple and robust navbar fix
+function fixNavbar() {
     const navbar = document.querySelector('.navbar');
-    const navbarToggle = document.querySelector('.hamburger');
+    if (!navbar) {
+        console.log('Navbar not found, retrying...');
+        setTimeout(fixNavbar, 100);
+        return;
+    }
+
+    // Force navbar to be visible and fixed
+    navbar.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-bottom: 1px solid rgba(236, 72, 153, 0.2) !important;
+        z-index: 99999 !important;
+        padding: 0.8rem 0 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        margin: 0 !important;
+    `;
+
+    // Mobile menu functionality
+    const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
-    
-    if (!navbar) return;
 
-    // Force navbar to stay visible with maximum priority
-    function keepNavbarVisible() {
-        navbar.style.position = 'fixed';
-        navbar.style.top = '0';
-        navbar.style.left = '0';
-        navbar.style.right = '0';
-        navbar.style.zIndex = '99999';
-        navbar.style.display = 'block';
-        navbar.style.visibility = 'visible';
-        navbar.style.opacity = '1';
-        navbar.style.width = '100%';
-    }
-
-    // Keep navbar visible immediately
-    keepNavbarVisible();
-
-    // Enhanced scroll effect with performance optimization
-    let ticking = false;
-    window.addEventListener('scroll', function() {
-        if (!ticking) {
-            requestAnimationFrame(function() {
-                const scrolled = window.scrollY;
-                
-                if (scrolled > 20) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                
-                // Update active navigation link
-                updateActiveNavLink();
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
-
-    // Update active navigation link based on scroll position
-    function updateActiveNavLink() {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollPosition = window.scrollY + 100;
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-            
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${sectionId}`) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-        });
-    }
-
-    // Mobile menu toggle
-    if (navbarToggle && navMenu) {
-        navbarToggle.addEventListener('click', function() {
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function() {
             this.classList.toggle('active');
             navMenu.classList.toggle('active');
             
-            // Prevent body scroll when menu is open
             if (navMenu.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -662,7 +564,7 @@ function initializeNavbar() {
         });
     }
 
-    // Close mobile menu when clicking on a link
+    // Close menu when clicking on links
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -673,14 +575,14 @@ function initializeNavbar() {
                 
                 if (targetElement) {
                     // Close mobile menu
-                    if (navbarToggle && navMenu) {
-                        navbarToggle.classList.remove('active');
+                    if (hamburger && navMenu) {
+                        hamburger.classList.remove('active');
                         navMenu.classList.remove('active');
                         document.body.style.overflow = '';
                     }
                     
-                    // Smooth scroll to target
-                    const offsetTop = targetElement.offsetTop - 80; // Account for navbar height
+                    // Smooth scroll
+                    const offsetTop = targetElement.offsetTop - 80;
                     window.scrollTo({
                         top: offsetTop,
                         behavior: 'smooth'
@@ -694,38 +596,75 @@ function initializeNavbar() {
         });
     });
 
-    // Close menu when clicking outside
-    document.addEventListener('click', function(e) {
-        if (navbarToggle && navMenu && 
-            !navbarToggle.contains(e.target) && 
-            !navMenu.contains(e.target)) {
-            navbarToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
+    // Enhanced scroll effect with real-time active link detection
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                // Navbar scroll effect
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                // Real-time active link detection
+                updateActiveNavLink();
+                ticking = false;
+            });
+            ticking = true;
         }
-    });
+    }, { passive: true });
 
-    // Close menu with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && navMenu && navMenu.classList.contains('active')) {
-            navbarToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
+    // Real-time active link detection function
+    function updateActiveNavLink() {
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const scrollPosition = window.scrollY + 100; // Offset for navbar height
+        
+        let currentSection = null;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                currentSection = sectionId;
+            }
+        });
+        
+        // Update active states
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#') && href.substring(1) === currentSection) {
+                link.classList.add('active');
+            }
+        });
+        
+        // If no section is active, default to home
+        if (!currentSection && window.scrollY < 200) {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#home') {
+                    link.classList.add('active');
+                }
+            });
         }
-    });
+    }
 
-    // Monitor navbar visibility continuously
-    const observer = new MutationObserver(function() {
-        keepNavbarVisible();
-    });
+    // Keep navbar visible every 2 seconds
+    setInterval(() => {
+        navbar.style.position = 'fixed';
+        navbar.style.top = '0';
+        navbar.style.zIndex = '99999';
+        navbar.style.display = 'block';
+        navbar.style.visibility = 'visible';
+        navbar.style.opacity = '1';
+    }, 2000);
 
-    observer.observe(navbar, {
-        attributes: true,
-        attributeFilter: ['style', 'class']
-    });
-
-    // Also check periodically to ensure navbar stays visible
-    setInterval(keepNavbarVisible, 2000);
+    console.log('Navbar fixed successfully!');
 }
 
 // Throttle function for performance
