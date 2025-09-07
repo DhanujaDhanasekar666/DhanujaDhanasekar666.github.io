@@ -7,6 +7,20 @@ document.addEventListener('DOMContentLoaded', fixNavbar);
 // Run again after a short delay to ensure it's working
 setTimeout(fixNavbar, 500);
 
+// Detect low-end devices and enable reduced-motion mode
+(function enableReducedMotionIfNeeded() {
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReduced) {
+        document.body.classList.add('reduced-motion');
+        // Thin out stars a bit to save perf, but keep motion
+        const stars = document.querySelectorAll('.star');
+        if (stars.length > 150) {
+            stars.forEach((s, i) => { if (i % 3 === 0) s.remove(); });
+        }
+    }
+})();
+
 // Form submission handling
 const contactForm = document.querySelector('.contact-form form');
 if (contactForm) {
@@ -224,6 +238,130 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollProgress();
     initStarryBackground();
     fixNavbar();
+
+    // Interactive tilt + heart burst for lottie frame
+    const lottieFrame = document.querySelector('.lottie-frame');
+    if (lottieFrame) {
+        let rect = null;
+        const maxTilt = 8;
+        lottieFrame.addEventListener('mouseenter', () => { rect = lottieFrame.getBoundingClientRect(); });
+        lottieFrame.addEventListener('mousemove', (e) => {
+            if (!rect) rect = lottieFrame.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            lottieFrame.style.transform = `rotateY(${x * maxTilt}deg) rotateX(${-y * maxTilt}deg)`;
+        });
+        lottieFrame.addEventListener('mouseleave', () => {
+            lottieFrame.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // Click to burst hearts
+        lottieFrame.addEventListener('click', (e) => {
+            const burstCount = 6;
+            const bounds = lottieFrame.getBoundingClientRect();
+            for (let i = 0; i < burstCount; i++) {
+                const d = document.createElement('span');
+                d.className = 'heart-burst';
+                const angle = (Math.PI * 2 * i) / burstCount;
+                const dist = 60 + Math.random() * 30;
+                d.style.left = `${e.clientX - bounds.left}px`;
+                d.style.top = `${e.clientY - bounds.top}px`;
+                d.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                d.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+                lottieFrame.appendChild(d);
+                setTimeout(() => d.remove(), 900);
+            }
+        });
+    }
+
+    // Recolor Lottie to match theme (convert greenish hues toward pink)
+    const lottiePlayer = document.querySelector('.lottie-frame lottie-player');
+    if (lottiePlayer) {
+        const src = lottiePlayer.getAttribute('src');
+        if (src && !src.startsWith('http')) {
+            fetch(src)
+                .then(r => r.json())
+                .then(json => {
+                    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+                    const toPink = (arr) => {
+                        // arr like [r,g,b,a] in 0..1
+                        if (!Array.isArray(arr) || arr.length < 3) return arr;
+                        let [r, g, b, a = 1] = arr;
+                        // Detect greenish (g dominant, low red/blue)
+                        const isGreenish = (g > 0.35) && (g > r + 0.08) && (g > b + 0.08);
+                        if (!isGreenish) return arr;
+                        // Choose a pink based on luminance (darker -> deeper pink, lighter -> soft pink)
+                        const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+                        const palette = [
+                            [236/255, 72/255, 153/255],   // bright pink
+                            [244/255, 114/255, 182/255],  // rose pink
+                            [251/255, 207/255, 232/255]   // soft pink
+                        ];
+                        const [pr, pg, pb] = lum < 0.45 ? palette[0] : (lum < 0.75 ? palette[1] : palette[2]);
+                        // Blend strongly toward chosen pink
+                        const mix = 0.85;
+                        r = clamp01(pr*mix + r*(1-mix));
+                        g = clamp01(pg*mix + g*(1-mix));
+                        b = clamp01(pb*mix + b*(1-mix));
+                        return [r, g, b, a];
+                    };
+                    const recolor = (obj) => {
+                        if (!obj || typeof obj !== 'object') return;
+                        // fills/strokes typically under it[].ty === 'fl'|'st' with c.k
+                        if (obj.c && obj.c.k) {
+                            if (Array.isArray(obj.c.k)) {
+                                obj.c.k = toPink(obj.c.k);
+                            } else if (obj.c.k.x !== undefined && obj.c.k.k) {
+                                // animated color: k is array of keyframes
+                                obj.c.k.k.forEach(kf => {
+                                    if (kf && kf.s) kf.s = toPink(kf.s);
+                                });
+                            }
+                        }
+                        // gradients: g.k.k has color stops in pairs [pos,r,g,b,pos,r,g,b,...]
+                        if (obj.g && obj.g.k && Array.isArray(obj.g.k.k)) {
+                            for (let i = 0; i < obj.g.k.k.length; i += 4) {
+                                const r = obj.g.k.k[i+1], g = obj.g.k.k[i+2], b = obj.g.k.k[i+3];
+                                const mapped = toPink([r, g, b, 1]);
+                                obj.g.k.k[i+1] = mapped[0];
+                                obj.g.k.k[i+2] = mapped[1];
+                                obj.g.k.k[i+3] = mapped[2];
+                            }
+                        }
+                        // recurse
+                        Object.keys(obj).forEach(k => recolor(obj[k]));
+                    };
+                    recolor(json);
+                    const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    lottiePlayer.setAttribute('src', url);
+                })
+                .catch(() => {/* ignore on failure */});
+        }
+    }
+    // Global tap bubble across the page (mouse and touch)
+    const spawnBubble = (x, y) => {
+        const b = document.createElement('span');
+        b.className = 'tap-bubble';
+        b.style.left = `${x}px`;
+        b.style.top = `${y}px`;
+        // small random drift
+        const driftX = (Math.random() * 20 - 10).toFixed(0) + 'px';
+        const driftY = (Math.random() * 20 - 10).toFixed(0) + 'px';
+        b.style.setProperty('--tx', `calc(-50% + ${driftX})`);
+        b.style.setProperty('--ty', `calc(-50% + ${driftY})`);
+        document.body.appendChild(b);
+        setTimeout(() => b.remove(), 700);
+    };
+
+    window.addEventListener('click', (e) => {
+        spawnBubble(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        if (t) spawnBubble(t.clientX, t.clientY);
+    }, { passive: true });
 });
 
 // Enhanced parallax effect to floating elements
@@ -248,7 +386,7 @@ document.querySelectorAll('.project-card').forEach(card => {
     
     card.addEventListener('mouseleave', function() {
         if (!isMobile) {
-            this.style.transform = 'translateY(0) scale(1)';
+        this.style.transform = 'translateY(0) scale(1)';
             this.style.boxShadow = '0 4px 25px rgba(236, 72, 153, 0.12)';
         }
     });
