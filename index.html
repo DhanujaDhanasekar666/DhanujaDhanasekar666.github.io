@@ -9,12 +9,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- Starry Background -->
+    <div class="stars-container"></div>
+    
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress"></div>
+    
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <span class="logo-text">Dhanu</span>
-                <span class="logo-emoji">🌸</span>
+                <a href="#home" class="logo-link">
+                    <span class="logo-emoji">🌸</span>
+                </a>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -47,7 +54,7 @@
             <div class="hero-content">
                 <div class="hero-text">
                     <h1 class="hero-title">
-                        Hello, I'm <span class="highlight">Dhanuja</span> ✨
+                        Hello! I'm <span class="highlight">Dhanuja</span>
                     </h1>
                     <p class="hero-subtitle">
                         A creative soul who loves to bring dreams to life with code and design
@@ -282,6 +289,32 @@
             </div>
         </div>
     </footer>
+
+    <!-- Floating Action Button -->
+    <div class="floating-action-btn">
+        <div class="fab-main">
+            <i class="fas fa-plus"></i>
+        </div>
+        <div class="fab-menu">
+            <a href="#home" class="fab-item" title="Home">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="#about" class="fab-item" title="About">
+                <i class="fas fa-user"></i>
+            </a>
+            <a href="#projects" class="fab-item" title="Projects">
+                <i class="fas fa-code"></i>
+            </a>
+            <a href="#contact" class="fab-item" title="Contact">
+                <i class="fas fa-envelope"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script src="script.js"></script>
 </body>
