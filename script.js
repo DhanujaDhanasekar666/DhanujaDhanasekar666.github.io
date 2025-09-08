@@ -238,6 +238,31 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollProgress();
     initStarryBackground();
     fixNavbar();
+    // Project image lightbox
+    const imageModal = document.getElementById('image-modal');
+    const imageModalClose = document.getElementById('image-modal-close');
+    const imageModalContent = document.getElementById('image-modal-content');
+    const projectImgs = document.querySelectorAll('.project-card .project-image img');
+    if (projectImgs.length && imageModal && imageModalClose && imageModalContent) {
+        projectImgs.forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', () => {
+                imageModalContent.src = img.src;
+                imageModal.classList.add('show');
+                document.documentElement.style.overflow = 'hidden';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        const closeModal = () => {
+            imageModal.classList.remove('show');
+            imageModalContent.src = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        };
+        imageModalClose.addEventListener('click', closeModal);
+        imageModal.addEventListener('click', (e) => { if (e.target === imageModal) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && imageModal.classList.contains('show')) closeModal(); });
+    }
 
     // Interactive tilt + heart burst for lottie frame
     const lottieFrame = document.querySelector('.lottie-frame');
