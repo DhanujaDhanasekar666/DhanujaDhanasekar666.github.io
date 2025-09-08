@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dhanu - Pink Dreams & Creative Magic ✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="prefetch" href="assets/lottie/programming-animation.json" as="fetch" crossorigin>
+    <link rel="preload" href="styles.css" as="style">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -31,7 +37,7 @@
             <div class="nav-logo">
                 <a href="#home" class="logo-link">
                     <span class="logo-emoji">🌸</span>
-                    <span class="logo-text">Dhanu</span>
+                <span class="logo-text">Dhanu</span>
                 </a>
             </div>
             <ul class="nav-menu">
@@ -84,7 +90,7 @@
                     </div>
                     <!-- Lottie girly developer illustration (lightweight, high-quality) -->
                     <div class="lottie-frame" aria-hidden="true">
-                        <lottie-player src="assets/lottie/programming-animation.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                        <lottie-player src="assets/lottie/programming-animation.json" background="transparent" speed="1" loop autoplay loading="lazy"></lottie-player>
                     </div>
                     <!-- Girly ornaments: floating hearts & sparkles -->
                     <div class="hero-ornaments" aria-hidden="true">
@@ -194,7 +200,7 @@
             <div class="projects-grid">
                 <div class="project-card">
                     <div class="project-image">
-                        <img src="assets/projects/p1.png" alt="Color-Based Face Mask Segmentation preview" loading="lazy">
+                        <img src="assets/projects/p1.png" alt="Color-Based Face Mask Segmentation preview" loading="lazy" decoding="async" fetchpriority="low" width="640" height="360" sizes="(max-width: 768px) 100vw, 600px">
                     </div>
                     <div class="project-content">
                         <h3 class="project-title">Color-Based Face Mask Segmentation (Research-Work)</h3>
@@ -216,7 +222,7 @@
                 </div>
                 <div class="project-card">
                     <div class="project-image">
-                        <img src="assets/projects/p2.png" alt="Dreamy Portfolio preview" loading="lazy">
+                        <img src="assets/projects/p2.png" alt="Dreamy Portfolio preview" loading="lazy" decoding="async" fetchpriority="low" width="640" height="360" sizes="(max-width: 768px) 100vw, 600px">
                     </div>
                     <div class="project-content">
                         <h3 class="project-title">Dreamy Portfolio (This Website)</h3>
@@ -284,15 +290,15 @@
     <div class="image-modal" id="image-modal" aria-hidden="true">
         <button class="image-modal-close" id="image-modal-close" aria-label="Close">×</button>
         <img class="image-modal-content" id="image-modal-content" alt="Expanded project preview">
-    </div>
+                </div>
 
     <!-- Simple Copyright -->
     <div class="simple-copyright">
         <p>© 2025 Dhanuja. All rights reserved.</p>
-    </div>
+        </div>
 
     <!-- Lottie web component -->
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <script src="script.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

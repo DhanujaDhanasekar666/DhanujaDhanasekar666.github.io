@@ -1077,6 +1077,12 @@ body.reduced-motion .tap-bubble { animation-duration: 350ms; box-shadow: none; }
     background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
 }
 
+/* Performance: skip rendering offscreen sections until needed */
+.about, .projects, .contact, .education {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px;
+}
+
 .projects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

@@ -173,8 +173,15 @@ particleStyle.textContent = `
 `;
 document.head.appendChild(particleStyle);
 
-// Create floating particles periodically
-setInterval(createFloatingParticle, 2000);
+// Create floating particles periodically (pause when tab hidden)
+let particleIntervalId = setInterval(createFloatingParticle, 2600);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        clearInterval(particleIntervalId);
+    } else {
+        particleIntervalId = setInterval(createFloatingParticle, isMobile ? 5000 : 2600);
+    }
+});
 
 // Enhanced scroll reveal animation
 function revealOnScroll() {
@@ -390,15 +397,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Enhanced parallax effect to floating elements
-window.addEventListener('scroll', () => {
+const onScrollParallax = () => {
     const floatingElements = document.querySelectorAll('.floating-emoji');
     const scrolled = window.pageYOffset;
-    
     floatingElements.forEach((element, index) => {
-        const speed = 0.5 + (index * 0.1);
-        element.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.1}deg)`;
+        const speed = 0.3 + (index * 0.08);
+        element.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.08}deg)`;
     });
-});
+};
+window.addEventListener('scroll', throttle(onScrollParallax, 16), { passive: true });
 
 // Enhanced hover effect to project cards with performance optimization
 document.querySelectorAll('.project-card').forEach(card => {
@@ -430,8 +437,8 @@ window.addEventListener('load', () => {
 // Enhanced confetti effect on button clicks
 function createConfetti() {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-    
-    for (let i = 0; i < 50; i++) {
+    const count = 28;
+    for (let i = 0; i < count; i++) {
         const confetti = document.createElement('div');
         confetti.style.cssText = `
             position: fixed;
@@ -440,7 +447,7 @@ function createConfetti() {
             background: ${colors[Math.floor(Math.random() * colors.length)]};
             top: -10px;
             left: ${Math.random() * window.innerWidth}px;
-            animation: confettiFall ${Math.random() * 2 + 2}s linear forwards;
+            animation: confettiFall ${Math.random() * 1.4 + 1.2}s linear forwards;
             pointer-events: none;
             z-index: 9999;
             border-radius: 50%;
@@ -448,7 +455,7 @@ function createConfetti() {
         
         document.body.appendChild(confetti);
         
-        setTimeout(() => confetti.remove(), 4000);
+        setTimeout(() => confetti.remove(), 2500);
     }
 }
 
