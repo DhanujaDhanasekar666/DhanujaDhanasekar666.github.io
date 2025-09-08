@@ -616,6 +616,106 @@ function preloadResources() {
 // Initialize preloading
 document.addEventListener('DOMContentLoaded', preloadResources);
 
+// First-visit loader
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('first-visit-loader');
+    if (!loader) return;
+
+    // Always show loader on each page load
+    loader.style.display = 'flex';
+    // Prevent scroll behind
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    // After ~2s show a full-page petal explosion, then fade out
+    const runOutro = () => {
+        createFullPagePetalExplosion();
+        setTimeout(hide, 550);
+    };
+
+    const hide = () => {
+        loader.classList.add('hidden');
+        setTimeout(() => {
+            loader.style.display = 'none';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        }, 500);
+    };
+
+    // Ensure flowers swirl for ~2s, then explode petals
+    setTimeout(runOutro, 2000);
+});
+
+// Sparkly particle burst matching theme
+function createSparkleExplosion(anchor) {
+    try {
+        const bounds = anchor.getBoundingClientRect();
+        const centerX = bounds.left + bounds.width / 2;
+        const centerY = bounds.top + bounds.height / 2;
+        const particles = ['✨', '🌸', '💖', '⭐', '🎀'];
+        const count = 24;
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.textContent = particles[i % particles.length];
+            p.style.cssText = `
+                position: fixed;
+                left: ${centerX}px;
+                top: ${centerY}px;
+                transform: translate(-50%, -50%);
+                font-size: ${Math.random() * 16 + 14}px;
+                pointer-events: none;
+                z-index: 10001;
+                opacity: 0.95;
+                will-change: transform, opacity;
+            `;
+            document.body.appendChild(p);
+            const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+            const dist = 80 + Math.random() * 60;
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist;
+            p.animate([
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0.2)`, opacity: 0 }
+            ], { duration: 800, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+            setTimeout(() => p.remove(), 850);
+        }
+    } catch (_) { /* noop */ }
+}
+
+// Full-page petal explosion using emoji particles
+function createFullPagePetalExplosion() {
+    const particles = ['🌸','💮','🌺','💖','✨'];
+    const count = 60;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.textContent = particles[i % particles.length];
+        p.style.cssText = `
+            position: fixed;
+            left: ${centerX}px;
+            top: ${centerY}px;
+            transform: translate(-50%, -50%);
+            font-size: ${Math.random() * 18 + 16}px;
+            pointer-events: none;
+            z-index: 10001;
+            opacity: 0.95;
+            will-change: transform, opacity;
+        `;
+        document.body.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 120 + Math.random() * 180;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist;
+        const duration = 900 + Math.random() * 500;
+        p.animate([
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${(Math.random()*360)|0}deg) scale(0.3)`, opacity: 0 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+        setTimeout(() => p.remove(), duration + 50);
+    }
+}
+
 // Scroll Progress Bar
 function initScrollProgress() {
     const progressBar = document.querySelector('.scroll-progress');
